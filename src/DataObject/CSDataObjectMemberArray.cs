@@ -30,6 +30,11 @@ namespace CSharpDataEditorDll
             
         }
 
+        public override string GetName()
+        {
+            return MemberInfo.Name;
+        }
+
         /// <summary>
         /// Add a new element to this array
         /// </summary>
@@ -50,7 +55,9 @@ namespace CSharpDataEditorDll
         /// <param name="value">The CSDataObject to add</param>
         public void Add(CSDataObject value)
         {
-            Values.Add(NextIndex, value);
+            int index = NextIndex;
+            value.Index = index;
+            Values.Add(index, value);
         }
 
         /// <summary>
@@ -91,6 +98,10 @@ namespace CSharpDataEditorDll
             {
                 return Values[index];
             }
+            if (DeletedValues.ContainsKey(index))
+            {
+                return DeletedValues[index];
+            }
             return null;
         }
 
@@ -98,7 +109,7 @@ namespace CSharpDataEditorDll
         /// Get the indexses of this array
         /// </summary>
         /// <returns></returns>
-        public List<int> GetValues()
+        public List<int> GetUsedIndexes()
         {
             return new List<int>(Values.Keys);
         }
@@ -109,7 +120,7 @@ namespace CSharpDataEditorDll
         /// <returns></returns>
         public List<int> GetDeletedIndexses()
         {
-            return new List<int>(Values.Keys);
+            return new List<int>(DeletedValues.Keys);
         }
 
         public override object GetAsObject()

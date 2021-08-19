@@ -6,11 +6,6 @@ namespace CSharpDataEditorDll
 {
     public class CSDataObjectClass : CSDataObject
     {
-        public CSDataObjectClass(DataObjectFactory factory) : base(factory)
-        {
-            
-        }
-
         /// <summary>
         /// The type of this class
         /// </summary>
@@ -20,6 +15,16 @@ namespace CSharpDataEditorDll
         /// List of all members in this class
         /// </summary>
         public List<CSDataObject> ClassMembers = new List<CSDataObject>();
+
+        public CSDataObjectClass(DataObjectFactory factory) : base(factory)
+        {
+            
+        }
+
+        public override string GetName()
+        {
+            return ClassType.Name;
+        }
 
 
         public void InitializeEmptyClass()
