@@ -5,14 +5,20 @@ namespace CSharpDataEditorDll
 {
     public class CSDataObjectMember : CSDataObject
     {
-        public object InitialValue {get; private set;}
+        public string InitialValue {get; private set;}
 
-        public object CurrentValue {get; private set;}
+        public string CurrentValue {get; private set;}
 
-        public CSDataObjectMember(object value, DataObjectFactory factory) : base(factory)
+        public CSDOValueConverter ValueConverter = null;
+
+        public string CurrentError = null;
+
+        public CSDataObjectMember(object value, DataObjectFactory factory, CSDOValueConverter converter) : base(factory)
         {
-            InitialValue = value;
-            CurrentValue = value;
+            ValueConverter = converter;
+            string initialValue = converter.ConvertToString(value);
+            InitialValue = initialValue;
+            CurrentValue = initialValue;
         }
 
         public override string GetName()
@@ -22,22 +28,27 @@ namespace CSharpDataEditorDll
 
         public override object GetAsObject()
         {
-            return CurrentValue;
+            return ValueConverter.ConvertFromString(CurrentValue);
         }
 
-        public string GetCurrentValueText()
-        {
-            if (CurrentValue != null)
-            {
-                return CurrentValue.ToString();
-            }
-            return "";
-        }
-
-        public void SetValue(object value)
+        public void SetValue(string value)
         {
             CurrentValue = value;
             SetModificationState(ModificationStates.EDITED);
+            ValidateErrorState();
+        }
+
+        /// <summary>
+        /// Checks if we changed error state and report accordingly
+        /// </summary>
+        protected void ValidateErrorState()
+        {
+            object testConvert = ValueConverter.ConvertFromString(CurrentValue);
+            if (ValueConverter.GetError() != CurrentError)
+            {
+                CurrentError = ValueConverter.GetError();
+                ReportErrorState(this, CurrentError != null);
+            }
         }
 
         protected override bool IsModified()

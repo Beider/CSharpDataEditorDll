@@ -15,18 +15,25 @@ namespace CSharpDataEditorDll
         /// <param name="Value">The value</param>
         public static void SetValue(this MemberInfo member, object Instance, object Value)
         {
-            switch (member.MemberType)
+            try
             {
-                case MemberTypes.Field:
-                    ((FieldInfo) member).SetValue(Instance, Value);
-                    break;
-                case MemberTypes.Property:
-                    ((PropertyInfo) member).SetValue(Instance, Value);
-                    break;
-                default:
-                    Console.Error.WriteLine(
-                        $"Input MemberInfo was of type {member.MemberType.ToString()}, it should be of type FieldInfo or PropertyInfo");
-                    break;
+                switch (member.MemberType)
+                {
+                    case MemberTypes.Field:
+                        ((FieldInfo) member).SetValue(Instance, Value);
+                        break;
+                    case MemberTypes.Property:
+                        ((PropertyInfo) member).SetValue(Instance, Value);
+                        break;
+                    default:
+                        Console.Error.WriteLine(
+                            $"Input MemberInfo was of type {member.MemberType.ToString()}, it should be of type FieldInfo or PropertyInfo");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
             }
         }
 

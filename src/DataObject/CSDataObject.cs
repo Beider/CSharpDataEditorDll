@@ -51,6 +51,8 @@ namespace CSharpDataEditorDll
         /// </summary>
         protected Dictionary<string, object> Metadata = new Dictionary<string, object>();
 
+        public List<CSDataObject> InvalidObjects = new List<CSDataObject>();
+
         /// <summary>
         /// Convert this back into an object
         /// </summary>
@@ -191,6 +193,29 @@ namespace CSharpDataEditorDll
             else
             {
                 Metadata[key] = value;
+            }
+        }
+
+        /// <summary>
+        /// Reports any objects in error state to root
+        /// </summary>
+        /// <param name="dataObject">The object that has an error state change</param>
+        /// <param name="hasError">True if it has an error, false if error has been resolved</param>
+        protected void ReportErrorState(CSDataObject dataObject, bool hasError)
+        {
+            if (Parent != null)
+            {
+                Parent.ReportErrorState(dataObject, hasError);
+                return;
+            }
+
+            if (hasError && !InvalidObjects.Contains(dataObject))
+            {
+                InvalidObjects.Add(dataObject);
+            }
+            else if (!hasError && InvalidObjects.Contains(dataObject))
+            {
+                InvalidObjects.Remove(dataObject);
             }
         }
     }

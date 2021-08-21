@@ -91,7 +91,7 @@ namespace CSharpDataEditorDll
             // Check if this is just a basic value
             if (!isCustom && !isArray)
             {
-                dataObject = new CSDataObjectMember(value, this);
+                dataObject = new CSDataObjectMember(value, this, GetValueConverter(memberInfo));
                 // TODO: Check what basic type it is, for now all is string
             }
             else if (isArray)
@@ -111,7 +111,7 @@ namespace CSharpDataEditorDll
                         }
                         else
                         {
-                            cSDataObject = new CSDataObjectMember(child, this);
+                            cSDataObject = new CSDataObjectMember(child, this, GetValueConverter(memberInfo));
                         }
 
                         ((CSDataObjectMemberArray)dataObject).Add(cSDataObject);
@@ -147,6 +147,23 @@ namespace CSharpDataEditorDll
                     }
                 }
             }
+        }
+
+        private CSDOValueConverter GetValueConverter(MemberInfo memberInfo)
+        {
+            CSDOValueConverter converter = null;
+            foreach (Attribute convert in memberInfo.GetAttributesThatInheritFromType(typeof(CSDOValueConverter)))
+            {
+                converter = (CSDOValueConverter)convert;
+                break;
+            }
+
+            if (converter == null)
+            {
+                converter = new CSDOValueConverter(memberInfo.GetUnderlyingType());
+            }
+
+            return converter;
         }
 
     }
