@@ -179,5 +179,18 @@ namespace CSharpDataEditorDll
 
             return null;
         }
+
+        public static bool EqualsIgnoreCase(this string value, string compareValue)
+        {
+            if (value == null && compareValue == null)
+            {
+                return true;
+            }
+            else if (value == null || compareValue == null)
+            {
+                return false;
+            }
+            return value.Equals(compareValue, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

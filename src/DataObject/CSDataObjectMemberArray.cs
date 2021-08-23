@@ -151,6 +151,21 @@ namespace CSharpDataEditorDll
             }
         }
 
-        
+        public override List<CSDataObject> GetAllWithCustomAttribute<T>()
+        {
+            List<CSDataObject> returnList = base.GetAllWithCustomAttribute<T>();
+
+            foreach (CSDataObject dataObject in Values.Values)
+            {
+                returnList.AddRange(dataObject.GetAllWithCustomAttribute<T>());
+            }
+
+            return returnList;
+        }
+
+        public override List<CSDataObject> GetChildren()
+        {
+            return new List<CSDataObject>(Values.Values);
+        }
     }
 }

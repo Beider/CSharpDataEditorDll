@@ -120,6 +120,22 @@ namespace CSharpDataEditorDll
 
         public abstract string GetName();
 
+        /// <summary>
+        /// Returns all CSDataObjects in the tree that has any attribute that inherits from T
+        /// </summary>
+        /// <typeparam name="T">The attribute you are looking for</typeparam>
+        public virtual List<CSDataObject> GetAllWithCustomAttribute<T>() where T : CSDOCustomAtrribute
+        {
+            List<CSDataObject> returnList = new List<CSDataObject>();
+
+            if (GetCustomAttribute<T>() != null)
+            {
+                returnList.Add(this);
+            }
+
+            return returnList;
+        }
+
         protected string GetParentKey()
         {
             if (Parent != null)
@@ -175,6 +191,27 @@ namespace CSharpDataEditorDll
             return null;
         }
 
+        /// <summary>
+        /// Get a all custom attribute of the given type
+        /// </summary>
+        /// <typeparam name="T">The type of attribute you want</typeparam>
+        /// <returns>List of attributes of that type, could be empty</returns>
+        public List<T> GetCustomAttributes<T>() where T : CSDOCustomAtrribute
+        {
+            List<T> attributeList = new List<T>();
+            foreach (CSDOCustomAtrribute attribute in CustomAttributes)
+            {
+                if (typeof(T).IsAssignableFrom(attribute.GetType()))
+                {
+                    attributeList.Add((T)attribute);
+                }
+            }
+            return attributeList;
+        }
+
+        /// <summary>
+        /// Get the value of the metadata or the default value
+        /// </summary>
         public T GetMetadata<T>(string key, T defaultValue)
         {
             if (Metadata.ContainsKey(key))
@@ -182,6 +219,18 @@ namespace CSharpDataEditorDll
                 return (T)Metadata[key];
             }
             return defaultValue;
+        }
+
+        /// <summary>
+        /// Get the value of the metadata or null
+        /// </summary>
+        public object GetMetadata(string key)
+        {
+            if (Metadata.ContainsKey(key))
+            {
+                return Metadata[key];
+            }
+            return null;
         }
 
         public void SetMetadata(string key, object value)
@@ -217,6 +266,14 @@ namespace CSharpDataEditorDll
             {
                 InvalidObjects.Remove(dataObject);
             }
+        }
+
+        /// <summary>
+        /// Convenience implementation so you don't need to cast to Array or Class to get children
+        /// </summary>
+        public virtual List<CSDataObject> GetChildren()
+        {
+            return new List<CSDataObject>();
         }
     }
 }

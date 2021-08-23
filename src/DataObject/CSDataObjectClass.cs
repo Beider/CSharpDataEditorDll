@@ -52,5 +52,34 @@ namespace CSharpDataEditorDll
 
             return value;
         }
+
+        public CSDataObject FindMemberByName(string name)
+        {
+            foreach (CSDataObject dataObject in ClassMembers)
+            {
+                if (dataObject.MemberInfo.Name.Equals(name))
+                {
+                    return dataObject;
+                }
+            }
+            return null;
+        }
+
+        public override List<CSDataObject> GetAllWithCustomAttribute<T>()
+        {
+            List<CSDataObject> returnList = base.GetAllWithCustomAttribute<T>();
+
+            foreach (CSDataObject dataObject in ClassMembers)
+            {
+                returnList.AddRange(dataObject.GetAllWithCustomAttribute<T>());
+            }
+
+            return returnList;
+        }
+
+        public override List<CSDataObject> GetChildren()
+        {
+            return ClassMembers;
+        }
     }
 }

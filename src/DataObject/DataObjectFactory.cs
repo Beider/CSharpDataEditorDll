@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Collections;
@@ -14,23 +15,45 @@ namespace CSharpDataEditorDll
         {
             get
             {
-                if (_systemTypes == null)
-                {
-                    _systemTypes = BinaryAssembly.GetType().Assembly.GetExportedTypes().ToList();
-                }
+                // Refresh if needed
+                GetAssembly();
                 return _systemTypes;
             }
         }
 
         private Dictionary<string, CSDataObjectClass> MetaDataBuffer = new Dictionary<string, CSDataObjectClass>();
 
+        /// <summary>
+        /// Do not access directly, use GetAssembly() instead if needed so you get the latest assembly
+        /// </summary>
         private Assembly BinaryAssembly;
-        private Type DataAttributeType;
+        private DateTime BinaryLastWriteTime = new DateTime(0);
+
+        public Type DataAttributeType {get; private set;}
 
         public DataObjectFactory(Type dataAttributeType, Assembly assembly)
         {
             BinaryAssembly = assembly;
+            BinaryLastWriteTime = GetLastBinaryWriteTime();
+            _systemTypes = BinaryAssembly.GetType().Assembly.GetExportedTypes().ToList();
             DataAttributeType = dataAttributeType;
+        }
+
+        private DateTime GetLastBinaryWriteTime()
+        {
+            return File.GetLastWriteTime(BinaryAssembly.Location);
+        }
+
+        public Assembly GetAssembly()
+        {
+            DateTime lastWrite = GetLastBinaryWriteTime();
+            if (lastWrite > BinaryLastWriteTime)
+            {
+                BinaryLastWriteTime = lastWrite;
+                BinaryAssembly = Assembly.LoadFile(BinaryAssembly.Location);
+                _systemTypes = BinaryAssembly.GetType().Assembly.GetExportedTypes().ToList();
+            }
+            return BinaryAssembly;
         }
 
         /// <summary>
