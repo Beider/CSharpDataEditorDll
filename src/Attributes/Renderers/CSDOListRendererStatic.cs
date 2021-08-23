@@ -9,14 +9,12 @@ namespace CSharpDataEditorDll
     /// Defines this as a list of options, the method has to be a public static method
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
-    public abstract class CSDOListRendererStatic : CSDOList
+    public class CSDOListRendererStatic : CSDOList
     {
         private const string COULD_NOT_BE_RESOLVED = "- Method could not be resolved -";
         private readonly Type ClassType;
         private readonly string GetListMethodName;
         private readonly string GetColorMethodName;
-        private MethodInfo MethodInfoList = null;
-        private MethodInfo MethodInfoColor = null;
 
         /// <summary>
         /// Will call static methods to get values, please consider buffering in static methods
@@ -35,17 +33,14 @@ namespace CSharpDataEditorDll
 
         public override string[] GetList(CSDataObject dataObject)
         {
-            if (MethodInfoList == null)
-            {
-                MethodInfoList = ClassType.ResolveMethodInfo(GetListMethodName);
-            }
-            if (MethodInfoList == null)
+            MethodInfo methodInfo = GetMethodInfo(dataObject, GetListMethodName);
+            if (methodInfo == null)
             {
                 List<string> tmpDict = new List<string>();
                 tmpDict.Add(COULD_NOT_BE_RESOLVED);
                 return tmpDict.ToArray();
             }
-            string[] array = (string[])MethodInfoList.Invoke(null, new object[] { dataObject });
+            string[] array = (string[])methodInfo.Invoke(null, new object[] { dataObject });
             if (SortList)
             {
                 array = Sort(array);
@@ -65,12 +60,22 @@ namespace CSharpDataEditorDll
                 return null;
             }
 
-            if (MethodInfoColor == null)
+            MethodInfo methodInfo = GetMethodInfo(dataObject, GetColorMethodName);
+            if (methodInfo == null)
             {
-                MethodInfoColor = ClassType.ResolveMethodInfo(GetColorMethodName);
+                return "Red";
             }
+            return (string)methodInfo.Invoke(null, new object[] { value, dataObject });
+        }
 
-            return (string)MethodInfoColor.Invoke(null, new object[] { value, dataObject });
+        private MethodInfo GetMethodInfo(CSDataObject dataObject, string name)
+        {
+            Type type = dataObject.Factory.GetAssembly().GetType(ClassType.FullName);
+            if (type != null)
+            {
+                return type.ResolveMethodInfo(name);
+            }
+            return null;
         }
 
     }

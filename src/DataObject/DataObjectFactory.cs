@@ -27,30 +27,34 @@ namespace CSharpDataEditorDll
         /// Do not access directly, use GetAssembly() instead if needed so you get the latest assembly
         /// </summary>
         private Assembly BinaryAssembly;
+        private string BinaryLocation;
         private DateTime BinaryLastWriteTime = new DateTime(0);
 
         public Type DataAttributeType {get; private set;}
 
-        public DataObjectFactory(Type dataAttributeType, Assembly assembly)
+        public DataObjectFactory(Type dataAttributeType, string assemblyLocation)
         {
-            BinaryAssembly = assembly;
-            BinaryLastWriteTime = GetLastBinaryWriteTime();
-            _systemTypes = BinaryAssembly.GetType().Assembly.GetExportedTypes().ToList();
+            BinaryLocation = assemblyLocation;
+            GetAssembly();
             DataAttributeType = dataAttributeType;
         }
 
         private DateTime GetLastBinaryWriteTime()
         {
-            return File.GetLastWriteTime(BinaryAssembly.Location);
+            return File.GetLastWriteTime(BinaryLocation);
         }
 
+        /// <summary>
+        /// Get the latest version of the assembly
+        /// </summary>
+        /// <returns>The latest assembly</returns>
         public Assembly GetAssembly()
         {
             DateTime lastWrite = GetLastBinaryWriteTime();
             if (lastWrite > BinaryLastWriteTime)
             {
                 BinaryLastWriteTime = lastWrite;
-                BinaryAssembly = Assembly.LoadFile(BinaryAssembly.Location);
+                BinaryAssembly = Assembly.Load(File.ReadAllBytes(BinaryLocation));
                 _systemTypes = BinaryAssembly.GetType().Assembly.GetExportedTypes().ToList();
             }
             return BinaryAssembly;
@@ -169,6 +173,13 @@ namespace CSharpDataEditorDll
                         dataObject.CustomAttributes.Add((CSDOCustomAtrribute)attribute);
                     }
                 }
+            }
+
+            if (dataObject is CSDataObjectMember && dataObject.MemberInfo.GetUnderlyingType() == typeof(bool)
+                && dataObject.GetCustomAttribute<CSDORenderer>() == null)
+            {
+                // We got a bool with no renderer so add bool renderer
+                dataObject.CustomAttributes.Add(new CSDOListRendererBool());
             }
         }
 

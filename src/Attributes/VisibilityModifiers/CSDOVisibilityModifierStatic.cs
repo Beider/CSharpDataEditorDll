@@ -11,11 +11,9 @@ namespace CSharpDataEditorDll
     {
         private readonly Type SelfVisibleClassType;
         private readonly string SelfVisibleMethodName;
-        private MethodInfo SelfVisibleMethodInfo = null;
 
         private readonly Type ChildrenVisibleClassType;
         private readonly string ChildrenVisibleMethodName;
-        private MethodInfo ChildrenVisibleMethodInfo = null;
 
         /// <summary>
         /// Expects methods to take in one argument CSDataObject and return a bool Example: public static bool myVisCheckMethod(CSDataObject dataObject)
@@ -35,28 +33,40 @@ namespace CSharpDataEditorDll
 
         public override bool IsSelfVisible(CSDataObject dataObject)
         {
-            if (SelfVisibleMethodInfo == null)
+            if (SelfVisibleClassType == null)
             {
-                SelfVisibleMethodInfo = SelfVisibleClassType.ResolveMethodInfo(SelfVisibleMethodName);
+                return true;
             }
-            if (SelfVisibleMethodInfo != null)
+            MethodInfo methodInfo = GetMethodInfo(dataObject, SelfVisibleClassType, SelfVisibleMethodName);
+            if (methodInfo != null)
             {
-                return (bool)SelfVisibleMethodInfo.Invoke(null, new object[] { dataObject });
+                return (bool)methodInfo.Invoke(null, new object[] { dataObject });
             }
             return true;
         }
 
         public override bool AreChildrenVisible(CSDataObject dataObject)
         {
-            if (ChildrenVisibleMethodInfo == null)
+            if (ChildrenVisibleClassType == null)
             {
-                ChildrenVisibleMethodInfo = ChildrenVisibleClassType.ResolveMethodInfo(ChildrenVisibleMethodName);
+                return true;
             }
-            if (ChildrenVisibleMethodInfo != null)
+            MethodInfo methodInfo = GetMethodInfo(dataObject, ChildrenVisibleClassType, ChildrenVisibleMethodName);
+            if (methodInfo != null)
             {
-                return (bool)ChildrenVisibleMethodInfo.Invoke(null, new object[] { dataObject });
+                return (bool)methodInfo.Invoke(null, new object[] { dataObject });
             }
             return true;
+        }
+
+        private MethodInfo GetMethodInfo(CSDataObject dataObject, Type classType, string name)
+        {
+            Type type = dataObject.Factory.GetAssembly().GetType(classType.FullName);
+            if (type != null)
+            {
+                return type.ResolveMethodInfo(name);
+            }
+            return null;
         }
     }
 }

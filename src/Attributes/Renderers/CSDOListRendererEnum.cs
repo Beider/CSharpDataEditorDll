@@ -9,11 +9,10 @@ namespace CSharpDataEditorDll
     /// Will make a list based on an enum, will by default attempt to resolve it from the binary this attribute was from
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
-    public abstract class CSDOListRendererEnum : CSDOList
+    public class CSDOListRendererEnum : CSDOList
     {
-        private Type EnumType;
-
-        private readonly string Color;
+        protected readonly Type EnumType;
+        protected readonly string Color = null;
 
         public CSDOListRendererEnum(Type enumTypeName, string color = null, bool sortList = true) : base(true, sortList)
         {

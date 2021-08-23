@@ -18,11 +18,11 @@ namespace CSharpDataEditorDll
 
         private DataObjectFactory Factory;
 
-        public void Init(string parameters, Type type, Assembly assembly)
+        public void Init(string parameters, string typeName, string assemblyPath)
         {
             Folder = parameters;
-            ObjectType = type;
-            Factory = new DataObjectFactory(typeof(JsonPropertyAttribute), assembly);
+            Factory = new DataObjectFactory(typeof(JsonPropertyAttribute), assemblyPath);
+            ObjectType = Factory.GetAssembly().GetType(typeName);
             if (!Folder.EndsWith("/") && !Folder.EndsWith("\\"))
             {
                 Folder += "/";

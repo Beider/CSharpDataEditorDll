@@ -30,6 +30,18 @@ namespace CSharpDataEditorDll
         }
 
         /// <summary>
+        /// Get the background color for this value, may not be applied everywhere
+        /// </summary>
+        /// <param name="value">The value we want the color for</param>
+        /// <param name="dataObject">The data object this value belongs to</param>
+        /// <returns>A string representing the color, valid color names can be found here: https://docs.godotengine.org/en/stable/classes/class_color.html.
+        /// Null or empty sting for no color.</returns>
+        public virtual string GetBgColor(string value, CSDataObject dataObject)
+        {
+            return null;
+        }
+
+        /// <summary>
         /// The type of renderer to use. Please check the CSharpDataEditorGUI project for valid values and how you can add your own.
         /// </summary>
         /// <returns></returns>

@@ -7,7 +7,7 @@ namespace CSharpDataEditorDll
     /// Base class for all list renderers
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
-    public abstract class CSDOListRendererBool : CSDOList
+    public class CSDOListRendererBool : CSDOList
     {
         private const string TRUE = "True";
         private const string FALSE = "False";

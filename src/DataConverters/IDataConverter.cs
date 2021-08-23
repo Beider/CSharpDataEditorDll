@@ -9,9 +9,9 @@ namespace CSharpDataEditorDll
         /// Initializes the data converter
         /// </summary>
         /// <param name="parameters">The parameter for initialization</param>
-        /// <param name="type">The class type this data reader should read</param>
-        /// <param name="assembly">The assembly this type is from</param>
-        void Init(string parameters, Type type, Assembly assembly);
+        /// <param name="typeName">The class type this data reader should read</param>
+        /// <param name="assemblyPath">The path to the assembly this is for</param>
+        void Init(string parameters, string typeName, string assemblyPath);
 
         /// <summary>
         /// Request the object with the given name
