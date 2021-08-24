@@ -124,13 +124,18 @@ namespace CSharpDataEditorDll
         /// Returns all CSDataObjects in the tree that has any attribute that inherits from T
         /// </summary>
         /// <typeparam name="T">The attribute you are looking for</typeparam>
-        public virtual List<CSDataObject> GetAllWithCustomAttribute<T>() where T : CSDOCustomAtrribute
+        public List<CSDataObject> GetAllWithCustomAttribute<T>() where T : CSDOCustomAtrribute
         {
             List<CSDataObject> returnList = new List<CSDataObject>();
 
             if (GetCustomAttribute<T>() != null)
             {
                 returnList.Add(this);
+            }
+
+            foreach (CSDataObject dataObject in GetChildren())
+            {
+                returnList.AddRange(dataObject.GetAllWithCustomAttribute<T>());
             }
 
             return returnList;

@@ -23,7 +23,17 @@ namespace CSharpDataEditorDll
         /// </summary>
         private Dictionary<int, CSDataObject> Values = new Dictionary<int, CSDataObject>();
 
-        private Dictionary<int, CSDataObject> DeletedValues = new Dictionary<int, CSDataObject>();
+        //private Dictionary<int, CSDataObject> DeletedValues = new Dictionary<int, CSDataObject>();
+
+        /// <summary>
+        /// Sorted list of keys to the values dictionary
+        /// </summary>
+        private List<int> ActiveValues = new List<int>();
+
+        /// <summary>
+        /// list of keys to the values dictionary (no particular sorting)
+        /// </summary>
+        private List<int> DeletedValues = new List<int>();
 
         public CSDataObjectMemberArray(DataObjectFactory factory) : base(factory)
         {
@@ -58,6 +68,7 @@ namespace CSharpDataEditorDll
             int index = NextIndex;
             value.Index = index;
             Values.Add(index, value);
+            ActiveValues.Add(index);
         }
 
         /// <summary>
@@ -68,9 +79,9 @@ namespace CSharpDataEditorDll
         {
             if (Values.ContainsKey(index))
             {
-                DeletedValues.Add(index, Values[index]);
+                DeletedValues.Add(index);
+                ActiveValues.Remove(index);
                 Values[index].SetModificationState(ModificationStates.DELETED);
-                Values.Remove(index);
             }
         }
 
@@ -78,13 +89,36 @@ namespace CSharpDataEditorDll
         /// Undoes a remove
         /// </summary>
         /// <param name="index">The index to un remove</param>
-        public void UnRemove(int index)
+        public void UndoRemove(int index)
         {
-            if (DeletedValues.ContainsKey(index))
+            if (DeletedValues.Contains(index))
             {
-                Values.Add(index, DeletedValues[index]);
-                Values[index].SetModificationState(ModificationStates.NONE);
+                ActiveValues.Add(index);
                 DeletedValues.Remove(index);
+                Values[index].SetModificationState(ModificationStates.NONE);
+            }
+        }
+
+        /// <summary>
+        /// Moves the index to the moveTargetIndex. If moveBefore is true it moves in before if not after.
+        /// </summary>
+        /// <param name="index">The index to move</param>
+        /// <param name="moveTargetIndex">The index to move next to</param>
+        /// <param name="moveBefore">If true move before else move after</param>
+        public void Move(int index, int moveTargetIndex, bool moveBefore)
+        {
+            if (ActiveValues.Contains(index) && ActiveValues.Contains(moveTargetIndex))
+            {
+                ActiveValues.Remove(index);
+                int indexOf = ActiveValues.IndexOf(moveTargetIndex);
+                if (moveBefore)
+                {
+                    ActiveValues.Insert(indexOf, index);
+                }
+                else
+                {
+                    ActiveValues.Insert(indexOf+1, index);
+                }
             }
         }
 
@@ -98,10 +132,6 @@ namespace CSharpDataEditorDll
             {
                 return Values[index];
             }
-            if (DeletedValues.ContainsKey(index))
-            {
-                return DeletedValues[index];
-            }
             return null;
         }
 
@@ -109,18 +139,18 @@ namespace CSharpDataEditorDll
         /// Get the indexses of this array
         /// </summary>
         /// <returns></returns>
-        public List<int> GetUsedIndexes()
+        public IList<int> GetUsedIndexes()
         {
-            return new List<int>(Values.Keys);
+            return ActiveValues.AsReadOnly();
         }
 
         /// <summary>
         /// Get the deleted indexes of this array
         /// </summary>
         /// <returns></returns>
-        public List<int> GetDeletedIndexses()
+        public IList<int> GetDeletedIndexses()
         {
-            return new List<int>(DeletedValues.Keys);
+            return DeletedValues.AsReadOnly();
         }
 
         public override object GetAsObject()
@@ -132,7 +162,7 @@ namespace CSharpDataEditorDll
             Type elementType = MemberInfo.GetUnderlyingType().GetArrayOrListUnderlyingType();
             Type listType = typeof(List<>).MakeGenericType(elementType);
             IList list = (IList)Activator.CreateInstance(listType);
-            foreach (int key in Values.Keys)
+            foreach (int key in ActiveValues)
             {
                 list.Add(Values[key].GetAsObject());
             }
@@ -151,21 +181,11 @@ namespace CSharpDataEditorDll
             }
         }
 
-        public override List<CSDataObject> GetAllWithCustomAttribute<T>()
-        {
-            List<CSDataObject> returnList = base.GetAllWithCustomAttribute<T>();
-
-            foreach (CSDataObject dataObject in Values.Values)
-            {
-                returnList.AddRange(dataObject.GetAllWithCustomAttribute<T>());
-            }
-
-            return returnList;
-        }
-
         public override List<CSDataObject> GetChildren()
         {
-            return new List<CSDataObject>(Values.Values);
+            List<CSDataObject> children = new List<CSDataObject>();
+            ActiveValues.ForEach(v => children.Add(Values[v]));
+            return children;
         }
     }
 }
