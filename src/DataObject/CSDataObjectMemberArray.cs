@@ -56,6 +56,7 @@ namespace CSharpDataEditorDll
             CSDataObject value = Factory.CreateDataObject(null, val, elementType, null, this);
             value.SetModificationState(ModificationStates.NEW);
             Add(value);
+            NotifyChanged();
             return value;
         }
 
@@ -82,6 +83,7 @@ namespace CSharpDataEditorDll
                 DeletedValues.Add(index);
                 ActiveValues.Remove(index);
                 Values[index].SetModificationState(ModificationStates.DELETED);
+                NotifyChanged();
             }
         }
 
@@ -119,6 +121,7 @@ namespace CSharpDataEditorDll
                 {
                     ActiveValues.Insert(indexOf+1, index);
                 }
+                NotifyChanged();
             }
         }
 

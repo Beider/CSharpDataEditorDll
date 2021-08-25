@@ -53,6 +53,8 @@ namespace CSharpDataEditorDll
 
         public List<CSDataObject> InvalidObjects = new List<CSDataObject>();
 
+        public bool HasChanges {get; private set;} = false;
+
         /// <summary>
         /// Convert this back into an object
         /// </summary>
@@ -279,6 +281,17 @@ namespace CSharpDataEditorDll
         public virtual List<CSDataObject> GetChildren()
         {
             return new List<CSDataObject>();
+        }
+
+        protected void NotifyChanged()
+        {
+            if (Parent != null)
+            {
+                Parent.NotifyChanged();
+                return;
+            }
+
+            HasChanges = true;
         }
     }
 }

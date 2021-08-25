@@ -30,5 +30,11 @@ namespace CSharpDataEditorDll
         /// <returns></returns>
         bool SaveObject(string name, CSDataObject dataObject);
 
+        /// <summary>
+        /// Return a list of all known objects that can be accessed with GetObject
+        /// </summary>
+        /// <returns>A list of object names</returns>
+        string[] GetValidObjectNames();
+
     }
 }

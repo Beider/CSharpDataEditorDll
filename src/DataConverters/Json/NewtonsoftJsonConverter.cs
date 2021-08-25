@@ -1,11 +1,15 @@
 using System;
 using System.IO;
 using System.Globalization;
+using System.Collections.Generic;
 using System.Reflection;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Schema;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 
+#pragma warning disable 0618 // Ignore JsonSchemaGenerator deprication warning
 namespace CSharpDataEditorDll
 {
     /// <summary>
@@ -18,6 +22,8 @@ namespace CSharpDataEditorDll
 
         private DataObjectFactory Factory;
 
+        private JsonSchema Schema;
+
         public void Init(string parameters, string typeName, string assemblyPath)
         {
             Folder = parameters;
@@ -27,6 +33,36 @@ namespace CSharpDataEditorDll
             {
                 Folder += "/";
             }
+
+            if (ObjectType != null)
+            {
+                JsonSchemaGenerator generator = new JsonSchemaGenerator();
+                Schema = generator.Generate(ObjectType);
+            }
+        }
+
+
+        public string[] GetValidObjectNames()
+        {
+            List<string> returnList = new List<string>();
+            if (Directory.Exists(Folder))
+            {
+                foreach (string file in Directory.GetFiles(Folder))
+                {
+                    if (!file.ToLower().EndsWith(".json"))
+                    {
+                        continue;
+                    }
+                    string content = File.ReadAllText(file);
+                    JObject jObject = JObject.Parse(content);
+                    if (Schema != null && jObject.IsValid(Schema))
+                    {
+                        returnList.Add(Path.GetFileNameWithoutExtension(file));
+                    }
+                }
+            }
+
+            return returnList.ToArray();
         }
 
         public CSDataObjectClass GetObject(string name)
@@ -58,6 +94,8 @@ namespace CSharpDataEditorDll
         }
 
         private object FromJson(string json, Type type) => JsonConvert.DeserializeObject(json, type, Settings);
+
+        private object FromJson(string json) => JsonConvert.DeserializeObject(json, Settings);
 
         private string ToJson(object JsonObject) => JsonConvert.SerializeObject(JsonObject, Settings);
 

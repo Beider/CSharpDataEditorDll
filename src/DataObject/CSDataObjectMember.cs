@@ -31,11 +31,17 @@ namespace CSharpDataEditorDll
             return ValueConverter.ConvertFromString(CurrentValue);
         }
 
-        public void SetValue(string value)
+        public bool SetValue(string value)
         {
+            if (CurrentValue == value)
+            {
+                return false;
+            }
             CurrentValue = value;
             SetModificationState(ModificationStates.EDITED);
             ValidateErrorState();
+            NotifyChanged();
+            return true;
         }
 
         /// <summary>
