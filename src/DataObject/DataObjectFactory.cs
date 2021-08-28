@@ -26,11 +26,13 @@ namespace CSharpDataEditorDll
         /// <summary>
         /// Do not access directly, use GetAssembly() instead if needed so you get the latest assembly
         /// </summary>
-        private Assembly BinaryAssembly;
+        private Assembly BinaryAssembly = null;
         private string BinaryLocation;
         private DateTime BinaryLastWriteTime = new DateTime(0);
 
         public Type DataAttributeType {get; private set;}
+
+        public Exception BinaryLoadException;
 
         public DataObjectFactory(Type dataAttributeType, string assemblyLocation)
         {
@@ -50,12 +52,38 @@ namespace CSharpDataEditorDll
         /// <returns>The latest assembly</returns>
         public Assembly GetAssembly()
         {
+            // We might also get an assembly string
+            if (!File.Exists(BinaryLocation))
+            {
+                if (BinaryAssembly == null)
+                {
+                    // Attempt a normal load
+                    try
+                    {
+                        BinaryAssembly = Assembly.Load(BinaryLocation);
+                        _systemTypes = BinaryAssembly.GetType().Assembly.GetExportedTypes().ToList();
+                    }
+                    catch (Exception ex)
+                    {
+                        BinaryLoadException = ex;
+                    }
+                }
+                return BinaryAssembly;
+            }
+
             DateTime lastWrite = GetLastBinaryWriteTime();
             if (lastWrite > BinaryLastWriteTime)
             {
                 BinaryLastWriteTime = lastWrite;
-                BinaryAssembly = Assembly.Load(File.ReadAllBytes(BinaryLocation));
-                _systemTypes = BinaryAssembly.GetType().Assembly.GetExportedTypes().ToList();
+                try
+                {
+                    BinaryAssembly = Assembly.Load(File.ReadAllBytes(BinaryLocation));
+                    _systemTypes = BinaryAssembly.GetType().Assembly.GetExportedTypes().ToList();
+                }
+                catch (Exception ex)
+                {
+                    BinaryLoadException = ex;
+                }
             }
             return BinaryAssembly;
         }

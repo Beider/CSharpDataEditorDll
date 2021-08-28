@@ -33,22 +33,30 @@ namespace CSharpDataEditorDll
 
         public override string[] GetList(CSDataObject dataObject)
         {
-            Type enumType = LoadEnumFromAssembly(dataObject);
-            List<string> retList = new List<string>();
-            foreach (string name in Enum.GetNames(enumType))
+            try
             {
-                retList.Add(name);
-            }
-            if (retList.Count == 0)
-            {
-                retList.Add($"- Enum {enumType.Name} was empty -");
-            }
+                Type enumType = LoadEnumFromAssembly(dataObject);
+                List<string> retList = new List<string>();
+                foreach (string name in Enum.GetNames(enumType))
+                {
+                    retList.Add(name);
+                }
+                if (retList.Count == 0)
+                {
+                    retList.Add($"- Enum {enumType.Name} was empty -");
+                }
 
-            if (SortList)
-            {
-                retList = Sort(retList);
+                if (SortList)
+                {
+                    retList = Sort(retList);
+                }
+                return retList.ToArray();
             }
-            return retList.ToArray();
+            catch (Exception ex)
+            {
+                System.Console.Error.Write(ex);
+                return new string[] { ex.Message };
+            }
         }
 
         public override string GetColor(string value, CSDataObject dataObject)

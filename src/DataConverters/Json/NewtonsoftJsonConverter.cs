@@ -17,6 +17,7 @@ namespace CSharpDataEditorDll
     /// </summary>
     public class NewtonsoftJsonConverter : IDataConverter
     {
+        private string Error = "";
         private string Folder = "";
         private Type ObjectType = null;
 
@@ -24,10 +25,15 @@ namespace CSharpDataEditorDll
 
         private JsonSchema Schema;
 
-        public void Init(string parameters, string typeName, string assemblyPath)
+        public bool Init(string parameters, string typeName, string assemblyPath)
         {
             Folder = parameters;
             Factory = new DataObjectFactory(typeof(JsonPropertyAttribute), assemblyPath);
+            if (Factory.GetAssembly() == null)
+            {
+                Error = Factory.BinaryLoadException.Message;
+                return false;
+            }
             ObjectType = Factory.GetAssembly().GetType(typeName);
             if (!Folder.EndsWith("/") && !Folder.EndsWith("\\"))
             {
@@ -39,6 +45,13 @@ namespace CSharpDataEditorDll
                 JsonSchemaGenerator generator = new JsonSchemaGenerator();
                 Schema = generator.Generate(ObjectType);
             }
+
+            return true;
+        }
+
+        public string GetError()
+        {
+            return Error;
         }
 
 

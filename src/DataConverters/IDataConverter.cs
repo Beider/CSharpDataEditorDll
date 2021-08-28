@@ -11,7 +11,7 @@ namespace CSharpDataEditorDll
         /// <param name="parameters">The parameter for initialization</param>
         /// <param name="typeName">The class type this data reader should read</param>
         /// <param name="assemblyPath">The path to the assembly this is for</param>
-        void Init(string parameters, string typeName, string assemblyPath);
+        bool Init(string parameters, string typeName, string assemblyPath);
 
         /// <summary>
         /// Request the object with the given name
@@ -35,6 +35,11 @@ namespace CSharpDataEditorDll
         /// </summary>
         /// <returns>A list of object names</returns>
         string[] GetValidObjectNames();
+
+        /// <summary>
+        /// Get the last error if there was an error
+        /// </summary>
+        string GetError();
 
     }
 }

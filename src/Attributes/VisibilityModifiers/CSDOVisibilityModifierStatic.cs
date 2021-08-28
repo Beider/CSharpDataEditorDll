@@ -33,28 +33,42 @@ namespace CSharpDataEditorDll
 
         public override bool IsSelfVisible(CSDataObject dataObject)
         {
-            if (SelfVisibleClassType == null)
+            try
             {
-                return true;
+                if (SelfVisibleClassType == null)
+                {
+                    return true;
+                }
+                MethodInfo methodInfo = GetMethodInfo(dataObject, SelfVisibleClassType, SelfVisibleMethodName);
+                if (methodInfo != null)
+                {
+                    return (bool)methodInfo.Invoke(null, new object[] { dataObject });
+                }
             }
-            MethodInfo methodInfo = GetMethodInfo(dataObject, SelfVisibleClassType, SelfVisibleMethodName);
-            if (methodInfo != null)
+            catch (Exception ex)
             {
-                return (bool)methodInfo.Invoke(null, new object[] { dataObject });
+                System.Console.Error.Write(ex);
             }
             return true;
         }
 
         public override bool AreChildrenVisible(CSDataObject dataObject)
         {
-            if (ChildrenVisibleClassType == null)
+            try
             {
-                return true;
+                if (ChildrenVisibleClassType == null)
+                {
+                    return true;
+                }
+                MethodInfo methodInfo = GetMethodInfo(dataObject, ChildrenVisibleClassType, ChildrenVisibleMethodName);
+                if (methodInfo != null)
+                {
+                    return (bool)methodInfo.Invoke(null, new object[] { dataObject });
+                }
             }
-            MethodInfo methodInfo = GetMethodInfo(dataObject, ChildrenVisibleClassType, ChildrenVisibleMethodName);
-            if (methodInfo != null)
+            catch (Exception ex)
             {
-                return (bool)methodInfo.Invoke(null, new object[] { dataObject });
+                System.Console.Error.Write(ex);
             }
             return true;
         }

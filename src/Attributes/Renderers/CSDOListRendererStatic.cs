@@ -33,19 +33,27 @@ namespace CSharpDataEditorDll
 
         public override string[] GetList(CSDataObject dataObject)
         {
-            MethodInfo methodInfo = GetMethodInfo(dataObject, GetListMethodName);
-            if (methodInfo == null)
+            try
             {
-                List<string> tmpDict = new List<string>();
-                tmpDict.Add(COULD_NOT_BE_RESOLVED);
-                return tmpDict.ToArray();
+                MethodInfo methodInfo = GetMethodInfo(dataObject, GetListMethodName);
+                if (methodInfo == null)
+                {
+                    List<string> tmpDict = new List<string>();
+                    tmpDict.Add(COULD_NOT_BE_RESOLVED);
+                    return tmpDict.ToArray();
+                }
+                string[] array = (string[])methodInfo.Invoke(null, new object[] { dataObject });
+                if (SortList)
+                {
+                    array = Sort(array);
+                }
+                return array;
             }
-            string[] array = (string[])methodInfo.Invoke(null, new object[] { dataObject });
-            if (SortList)
+            catch (Exception ex)
             {
-                array = Sort(array);
+                System.Console.Error.Write(ex);
+                return new string[] { ex.Message };
             }
-            return array;
         }
 
         public override string GetColor(string value, CSDataObject dataObject)
@@ -60,12 +68,20 @@ namespace CSharpDataEditorDll
                 return null;
             }
 
-            MethodInfo methodInfo = GetMethodInfo(dataObject, GetColorMethodName);
-            if (methodInfo == null)
+            try
             {
+                MethodInfo methodInfo = GetMethodInfo(dataObject, GetColorMethodName);
+                if (methodInfo == null)
+                {
+                    return "Red";
+                }
+                return (string)methodInfo.Invoke(null, new object[] { value, dataObject });
+            }
+            catch (Exception ex)
+            {
+                System.Console.Error.Write(ex);
                 return "Red";
             }
-            return (string)methodInfo.Invoke(null, new object[] { value, dataObject });
         }
 
         private MethodInfo GetMethodInfo(CSDataObject dataObject, string name)
