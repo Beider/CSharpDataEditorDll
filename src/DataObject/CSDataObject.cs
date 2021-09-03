@@ -293,5 +293,23 @@ namespace CSharpDataEditorDll
 
             HasChanges = true;
         }
+
+        /// <summary>
+        /// Returns the class this is contianed in
+        /// </summary>
+        /// <returns></returns>
+        public CSDataObjectClass FindParentClass()
+        {
+            if (Parent == null)
+            {
+                return (CSDataObjectClass)this;
+            }
+
+            if (Parent is CSDataObjectClass)
+            {
+                return (CSDataObjectClass)Parent;
+            }
+            return Parent.FindParentClass();
+        }
     }
 }

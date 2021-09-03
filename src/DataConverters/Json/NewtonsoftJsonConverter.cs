@@ -20,6 +20,7 @@ namespace CSharpDataEditorDll
         private string Error = "";
         private string Folder = "";
         private Type ObjectType = null;
+        private bool IsValid = true;
 
         private DataObjectFactory Factory;
 
@@ -44,6 +45,7 @@ namespace CSharpDataEditorDll
             {
                 JsonSchemaGenerator generator = new JsonSchemaGenerator();
                 Schema = generator.Generate(ObjectType);
+                Schema.Required = false;
             }
 
             return true;
@@ -68,9 +70,14 @@ namespace CSharpDataEditorDll
                     }
                     string content = File.ReadAllText(file);
                     JObject jObject = JObject.Parse(content);
-                    if (Schema != null && jObject.IsValid(Schema))
+                    if (Schema != null)
                     {
-                        returnList.Add(Path.GetFileNameWithoutExtension(file));
+                        IsValid = true;
+                        jObject.Validate(Schema, OnValidationEvent);
+                        if (IsValid)
+                        {
+                            returnList.Add(Path.GetFileNameWithoutExtension(file));
+                        }
                     }
                 }
             }
@@ -121,9 +128,19 @@ namespace CSharpDataEditorDll
             Formatting = Formatting.Indented,
             DateParseHandling = DateParseHandling.None,
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            MissingMemberHandling = MissingMemberHandling.Ignore,
             Converters = {
                 new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
             },
         };
+
+        public void OnValidationEvent(object sender, ValidationEventArgs e)
+        {
+            if (e.Message.Contains("Required properties are missing from object:"))
+            {
+                return;
+            }
+            IsValid = false;
+        }
     }
 }

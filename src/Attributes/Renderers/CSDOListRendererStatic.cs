@@ -35,7 +35,7 @@ namespace CSharpDataEditorDll
         {
             try
             {
-                MethodInfo methodInfo = GetMethodInfo(dataObject, GetListMethodName);
+                MethodInfo methodInfo = GetMethodInfo(dataObject, ClassType, GetListMethodName);
                 if (methodInfo == null)
                 {
                     List<string> tmpDict = new List<string>();
@@ -68,31 +68,7 @@ namespace CSharpDataEditorDll
                 return null;
             }
 
-            try
-            {
-                MethodInfo methodInfo = GetMethodInfo(dataObject, GetColorMethodName);
-                if (methodInfo == null)
-                {
-                    return "Red";
-                }
-                return (string)methodInfo.Invoke(null, new object[] { value, dataObject });
-            }
-            catch (Exception ex)
-            {
-                System.Console.Error.Write(ex);
-                return "Red";
-            }
+            return GetColorInt(value, dataObject, ClassType, GetColorMethodName);
         }
-
-        private MethodInfo GetMethodInfo(CSDataObject dataObject, string name)
-        {
-            Type type = dataObject.Factory.GetAssembly().GetType(ClassType.FullName);
-            if (type != null)
-            {
-                return type.ResolveMethodInfo(name);
-            }
-            return null;
-        }
-
     }
 }

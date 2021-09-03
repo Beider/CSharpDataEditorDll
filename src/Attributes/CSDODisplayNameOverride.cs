@@ -9,9 +9,11 @@ namespace CSharpDataEditorDll
     public class CSDODisplayNameOverride : CSDOCustomAtrribute
     {
         public readonly string MemberName;
-        public CSDODisplayNameOverride(string memberName)
+        public readonly string SecondColumnMemberName;
+        public CSDODisplayNameOverride(string memberName, string secondColoumMemberName = null)
         {
             MemberName = memberName;
+            SecondColumnMemberName = secondColoumMemberName;
         }
     }
 }

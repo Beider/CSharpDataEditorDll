@@ -7,7 +7,7 @@ namespace CSharpDataEditorDll
     /// <summary>
     /// Simple color renderer to add a single color regardless of value
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Class, AllowMultiple = false)]
     public class CSDOColorRenderer : CSDORenderer
     {
         protected readonly string Color;

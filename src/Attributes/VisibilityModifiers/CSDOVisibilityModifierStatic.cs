@@ -72,15 +72,5 @@ namespace CSharpDataEditorDll
             }
             return true;
         }
-
-        private MethodInfo GetMethodInfo(CSDataObject dataObject, Type classType, string name)
-        {
-            Type type = dataObject.Factory.GetAssembly().GetType(classType.FullName);
-            if (type != null)
-            {
-                return type.ResolveMethodInfo(name);
-            }
-            return null;
-        }
     }
 }
