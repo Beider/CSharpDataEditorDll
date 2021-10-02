@@ -27,7 +27,7 @@ namespace CSharpDataEditorDll
         /// Do not access directly, use GetAssembly() instead if needed so you get the latest assembly
         /// </summary>
         private Assembly BinaryAssembly = null;
-        private string BinaryLocation;
+        public string BinaryLocation;
         private DateTime BinaryLastWriteTime = new DateTime(0);
 
         public Type DataAttributeType {get; private set;}
@@ -147,10 +147,16 @@ namespace CSharpDataEditorDll
             if (!isCustom && !isArray)
             {
                 dataObject = CreateDataObjectForMember(memberInfo, value, underlying);
+                if (memberInfo == null)
+                {
+                    dataObject.CustomAttributes = parent.CustomAttributes;
+                }
+                FillDataObject(dataObject, memberInfo);
             }
             else if (isArray)
             {
                 dataObject = new CSDataObjectMemberArray(this);
+                FillDataObject(dataObject, memberInfo);
                 if (value != null)
                 {
                     // Create CSDataObject for each array value and store in hashmap
@@ -167,6 +173,7 @@ namespace CSharpDataEditorDll
                         {
                             cSDataObject = CreateDataObjectForMember(null, child, underlying);
                             cSDataObject.Parent = dataObject;
+                            cSDataObject.CustomAttributes = dataObject.CustomAttributes;
                         }
 
                         ((CSDataObjectMemberArray)dataObject).Add(cSDataObject);
@@ -178,11 +185,11 @@ namespace CSharpDataEditorDll
             {
                 // We are a custom class
                 dataObject = CreateDataObjectClass(value, underlying, parent);
+                FillDataObject(dataObject, memberInfo);
             }
 
             dataObject.Parent = parent;
             dataObject.MemberInfo = memberInfo;
-            FillDataObject(dataObject, memberInfo);
 
             return dataObject;
         }
@@ -219,7 +226,7 @@ namespace CSharpDataEditorDll
                 }
             }
 
-            if (dataObject is CSDataObjectMember && dataObject.MemberInfo.GetUnderlyingType() == typeof(bool)
+            if (dataObject is CSDataObjectMember && memberInfo.GetUnderlyingType() == typeof(bool)
                 && dataObject.GetCustomAttribute<CSDORenderer>() == null)
             {
                 // We got a bool with no renderer so add bool renderer
