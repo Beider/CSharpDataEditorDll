@@ -23,6 +23,10 @@ namespace CSharpDataEditorDll
 
         public override string GetName()
         {
+            if (MemberInfo == null)
+            {
+                return ValueConverter.ConversionType.Name;
+            }
             return MemberInfo.Name;
         }
 

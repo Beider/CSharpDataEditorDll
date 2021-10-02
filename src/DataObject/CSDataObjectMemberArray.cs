@@ -52,7 +52,16 @@ namespace CSharpDataEditorDll
         public CSDataObject AddNew()
         {
             Type elementType = MemberInfo.GetUnderlyingType().GetArrayOrListUnderlyingType();
-            object val = Activator.CreateInstance(elementType);
+            object val = null;
+            if (elementType == typeof(string))
+            {
+                val = "";
+            }
+            else
+            {
+                val = Activator.CreateInstance(elementType);
+            }
+            
             CSDataObject value = Factory.CreateDataObject(null, val, elementType, null, this);
             value.SetModificationState(ModificationStates.NEW);
             Add(value);
