@@ -144,7 +144,7 @@ namespace CSharpDataEditorDll
             bool isCustom = !SystemTypes.Contains(underlying);
             
             // Check if this is just a basic value
-            if (!isCustom && !isArray)
+            if ((!isCustom && !isArray) || underlying.IsEnum)
             {
                 dataObject = CreateDataObjectForMember(memberInfo, value, underlying);
                 if (memberInfo == null)
